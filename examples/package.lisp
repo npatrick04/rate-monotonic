@@ -20,8 +20,10 @@
   (:use #:cl #:rate-monotonic)
   (:export
    #:major-minor-frame-example
-   #:*frame-resolution*
-   #:*major-period*
-   #:*minor-period*
+   #:*mm-frame-resolution*
+   #:*mm-major-period*
+   #:*mm-minor-period*
+
+   #:subframes
    ))
 
