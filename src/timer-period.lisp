@@ -18,20 +18,30 @@
 
 (in-package #:rate-monotonic)
 
+;;; The timer-period class provides an implementation of the rate-monotonic API
+;;; using the timer-wheel library.  It must be initialized with
+;;; TIMER-PERIOD-INIT and shutdown with TIMER-PERIOD-STOP (or using the helper
+;;; macro WITH-TIMER-PERIOD.
+
 (defparameter *timer-wheel* nil)
 
 (defun timer-period-init (&optional (resolution-ms 100) (wheel-size 100))
+  "Initialize the underlying *TIMER-WHEEL* with provided RESOLUTION-MS and WHEEL-SIZE."
   (setf *timer-wheel* (tw:make-wheel wheel-size resolution-ms))
   (tw:initialize-timer-wheel *timer-wheel*))
 
 (defun timer-period-stop ()
-  (tw:shutdown-timer-wheel *timer-wheel*))
+  "Shut down the underlying *TIMER-WHEEL*."
+  (tw:shutdown-timer-wheel *timer-wheel*)
+  (setf *timer-wheel* nil))
 
 (defmacro with-timer-period ((&optional (resolution-ms 100) (wheel-size 100)) &body body)
+  "Execute BODY with the *TIMER-WHEEL* initialized and running."
   `(progn
      (setf *timer-wheel* (tw:make-wheel ,wheel-size ,resolution-ms))
      (tw:with-timer-wheel *timer-wheel*
-       ,@body)))
+       ,@body)
+     (setf *timer-wheel* nil)))
 
 (defclass timer-period (period)
   ((timer :accessor timer-period-timer
@@ -42,9 +52,11 @@
 	 :initform (bt:make-condition-variable))))
 
 (defun make-timer-period ()
+  "A helper function to make a timer period object."
   (make-instance 'timer-period))
 
 (defun make-timer-period-timeout (timer-period)
+  "An internal function that returns a timeout lambda for the given TIMER-PERIOD."
   (lambda (wheel timer)
     (with-accessors ((lock     timer-lock)
 		     (cv       timer-cv)

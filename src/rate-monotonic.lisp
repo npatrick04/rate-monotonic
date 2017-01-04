@@ -42,6 +42,7 @@ When :EXPIRED, the period state will change to :RUNNING after
   (last-start 0))
 
 (defun reset-statistics (stat)
+  "Reset the values in a STAT struct."
   (setf (stat-count stat)         0
 	(stat-missed-count stat)  0
 	(stat-max-runtime stat)   0
