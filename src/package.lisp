@@ -18,6 +18,7 @@
 
 (defpackage #:rate-monotonic
   (:use #:cl)
+  (:nicknames #:rm)
   (:export
    #:timer-period-init
    #:timer-period-stop
