@@ -25,6 +25,7 @@
   :components ((:module "src"
 			:components
 			((:file "package")
+			 (:file "statistics")
 			 (:file "rate-monotonic")
 			 (:file "timer-period")))))
 

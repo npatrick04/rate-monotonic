@@ -24,6 +24,7 @@
 	(format t "~TInner period 2~%")
 	
 	;; Don't let the period expire (we don't want to bias the statistics)
-	(cancel inner))
+	(finish-period inner))
+      (finish-period major)
       (list (period-statistics major)
 	    (period-statistics inner)))))

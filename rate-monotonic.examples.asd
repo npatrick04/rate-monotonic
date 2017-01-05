@@ -25,5 +25,6 @@
   :components ((:module "examples"
 			:components
 			((:file "package")
-			 (:file "major-minor-frames")))))
+			 (:file "major-minor-frames")
+			 (:file "subframes")))))
 

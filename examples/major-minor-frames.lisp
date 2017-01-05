@@ -17,8 +17,8 @@
 	  (period minor :ms *mm-minor-period*)
 	  (format t "~TMinor frame ~A~%" minor-frame))
 
-	;; TODO: add a finish-period maybe to keep statistics for the last frame.
 	;; Don't bias the statistics
-	(cancel minor))
+	(finish-period minor))
+      (finish-period major)
       (list (period-statistics major)
 	    (period-statistics minor)))))

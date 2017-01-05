@@ -29,6 +29,7 @@
    #:period
    #:status
    #:cancel
+   #:finish-period
    #:period-statistics
 
    #:state

@@ -39,9 +39,9 @@
   "Execute BODY with the *TIMER-WHEEL* initialized and running."
   `(progn
      (setf *timer-wheel* (tw:make-wheel ,wheel-size ,resolution-ms))
-     (tw:with-timer-wheel *timer-wheel*
-       ,@body)
-     (setf *timer-wheel* nil)))
+     (prog1 (tw:with-timer-wheel *timer-wheel*
+	      ,@body)
+       (setf *timer-wheel* nil))))
 
 (defclass timer-period (period)
   ((timer :accessor timer-period-timer
@@ -134,6 +134,34 @@
 	    interval
 	    (tw:wheel-resolution *timer-wheel*)))
     (period p :ticks ticks)))
+
+(defmethod finish-period ((p timer-period))
+  (with-accessors
+	((timer           timer-period-timer)
+	 (lock            timer-lock)
+	 (cv              timer-cv)
+	 (state           period-state)
+	 (stats           period-statistics))
+      p
+
+    (let* ((now (get-internal-real-time))
+	   (dt (- now (stat-last-start stats))))
+      (bt:with-lock-held (lock)
+	(prog1
+	    (case state
+	      (:inactive
+	       (error "FINISH-PERIOD called on an INACTIVE period."))
+	      (:ready
+	       (error "FINISH-PERIOD called on a READY period."))
+	      (:running
+	       (update-statistics stats dt)
+	       (setf state :inactive)
+	       (tw:uninstall-timer *timer-wheel* timer)
+	       :successful)
+	      (:expired
+	       (update-statistics stats dt)
+	       (setf state :inactive)
+	       :timeout)))))))
 
 (defmethod status ((p timer-period))
   (values

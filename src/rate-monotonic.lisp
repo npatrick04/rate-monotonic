@@ -33,40 +33,6 @@ When :EXPIRED, the period state will change to :RUNNING after
     the thread calls PERIOD, and the period will be reinitialized
     with the provided interval.")
 
-(defstruct stat 
-  (count  0)
-  (missed-count 0)
-  (max-runtime 0)
-  (total-runtime 0)
-  (min-runtime 0)
-  (last-start 0))
-
-(defun reset-statistics (stat)
-  "Reset the values in a STAT struct."
-  (setf (stat-count stat)         0
-	(stat-missed-count stat)  0
-	(stat-max-runtime stat)   0
-	(stat-total-runtime stat) 0
-	(stat-min-runtime stat)   0))
-
-(defun update-statistics (stat this-time)
-  "Update STAT object with internal-real-time deltat THIS-TIME for a period."
-  (if (zerop (stat-count stat))
-      (setf (stat-min-runtime stat) this-time)
-      (incf (stat-total-runtime stat) this-time))
-  (when (> this-time (stat-max-runtime stat))
-    (setf (stat-max-runtime stat) this-time))
-  (incf (stat-count stat)))
-
-(defmethod print-object ((stat stat) stream)
-  (print-unreadable-object (stat stream :type t)
-    (format stream ":COUNT ~D :MISSED ~D :MIN ~D :AVG ~D :MAX ~D"
-	    (stat-count stat)
-	    (stat-missed-count stat)
-	    (stat-min-runtime stat)
-	    (round (stat-total-runtime stat) (stat-count stat))
-	    (stat-max-runtime stat))))
-
 (defclass period ()
   ((name :accessor period-name
 	 :initform ""
@@ -80,7 +46,7 @@ When :EXPIRED, the period state will change to :RUNNING after
 	     :initarg :interval)))
 
 (defgeneric cancel (period)
-  (:documentation "Cancel a period."))
+  (:documentation "Cancel a period, putting it into the inactive state."))
 
 (defgeneric period (period type interval)
   (:documentation "Initiate a PERIOD with the provided INTERVAL.  If a PERIOD is
@@ -96,6 +62,15 @@ When :EXPIRED, the period state will change to :RUNNING after
               underlying resolution.
   - :SECONDS - INTERVAL is a real value.
   - :MS - INTERVAL is an integral millisecond interval."))
+
+(defgeneric finish-period (period)
+  (:documentation "Complete a running PERIOD without restarting it.  The period
+  will not block on this call.  The return value is :SUCCESSFUL when calling
+  prior to the previous interval.
+
+  If a running period interval has already elapsed, the call returns :TIMEOUT.
+
+  This does essentially the same thing as CANCEL, but this captures statistics."))
 
 (defgeneric status (period)
   (:documentation "Return the status of the period in 2 values.
