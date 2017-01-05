@@ -19,7 +19,7 @@
 (asdf:defsystem #:rate-monotonic.examples
   :description "Examples for the rate monotonic period scheduler."
   :author "Nick Patrick <npatrick04@gmail.com>"
-  :license "GPL"
+  :license "GPL-v3"
   :depends-on (#:bordeaux-threads #:rate-monotonic)
   :serial t
   :components ((:module "examples"

@@ -17,9 +17,9 @@
 ;;; along with rate-monotonic.  If not, see <http://www.gnu.org/licenses/>.
 
 (asdf:defsystem #:rate-monotonic
-  :description "A rate monotonic period scheduler inspired by RTEMS."
+  :description "A periodic thread scheduler inspired by RTEMS."
   :author "Nick Patrick <npatrick04@gmail.com>"
-  :license "Specify license here"
+  :license "GPL-v3"
   :depends-on (#:bordeaux-threads #:timer-wheel)
   :serial t
   :components ((:module "src"
